@@ -1,17 +1,16 @@
 from replit import clear
 from pynput import keyboard
 import os
-
+import sys
 
 def main_game():
-    clear()
     board = """
             __|__|__
             __|__|__
               |  |
             """
 
-    a1 = "___|"
+    a1 = "___|"  
     b1 = "___"
     c1 = "|___"
     a2 = "___|"
@@ -21,6 +20,7 @@ def main_game():
     b3 = "   "
     c3 = "|  "
 
+    global again_true
     global cursor
     global dublicate
     global last_symbol
@@ -37,6 +37,7 @@ def main_game():
     rows = [row1, row2, row3]
 
     def display_grid(grid):
+        #os.system('cls' if os.name == 'nt' else 'clear')
         for x, row in enumerate(rows):
             row_to_display = ""
             for y, symbol in enumerate(row):
@@ -86,7 +87,7 @@ def main_game():
             pass
         else:
             y += 1
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         display_cursor_at_grid_pos(rows, y, x)
 
     def move_up():
@@ -95,7 +96,7 @@ def main_game():
             pass
         else:
             y -= 1
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         display_cursor_at_grid_pos(rows, y, x)
 
     global x
@@ -109,7 +110,7 @@ def main_game():
             pass
         else:
             x += 1
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         display_cursor_at_grid_pos(rows, y, x)
 
     def move_left():
@@ -118,7 +119,7 @@ def main_game():
             pass
         else:
             x -= 1
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         display_cursor_at_grid_pos(rows, y, x)
 
     def check_for_win(grid):
@@ -230,9 +231,9 @@ def main_game():
 
                 cursor = "X"
 
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         display_cursor_at_grid_pos(rows, y, x)
-        clear()
+        os.system('cls' if os.name == 'nt' else 'clear')
         paint_cursor(rows, y, x)
 
     global n_pressed
@@ -242,42 +243,59 @@ def main_game():
         global end_game
         global n_pressed
         global how_many_marks
+        global again_true
 
-        if end_game or how_many_marks == 9:
-            if key == keyboard.KeyCode.from_char("y"):
-                main_game()
+        try:
+        
+            if end_game or how_many_marks == 9:
+                if key == keyboard.KeyCode.from_char("y"):
+                    listener.stop()
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    again_true = True
+                    
+                elif key == keyboard.KeyCode.from_char("n"):
+                    n_pressed = True
 
-            elif key == keyboard.KeyCode.from_char("n"):
-                n_pressed = True
+            else:
+                if key == key.up:
+                    move_up()
+                if key == key.down:
+                    move_down()
+                if key == key.left:
+                    move_left()
+                if key == key.right:
+                    move_right()
+                if key == key.space:
+                    mark()
+                if check_for_win(grid=rows) == 1:
+                    print("X won")
+                    print("Do you want to play again?(Y/N)")
+                    end_game = True
+                elif check_for_win(grid=rows) == 0:
+                    print("0 won")
+                    print("Do you want to play again?(Y/N)")
+                    end_game = True
+                elif how_many_marks == 9:
+                    print("Game is even.")
+                    print("Do you want to play again?(Y/N)")
 
-        else:
-            if key == key.up:
-                move_up()
-            if key == key.down:
-                move_down()
-            if key == key.left:
-                move_left()
-            if key == key.right:
-                move_right()
-            if key == key.space:
-                mark()
-            if check_for_win(grid=rows) == 1:
-                print("X won")
-                print("Do you want to play again?(Y/N)")
-                end_game = True
-            elif check_for_win(grid=rows) == 0:
-                print("0 won")
-                print("Do you want to play again?(Y/N)")
-                end_game = True
-            elif how_many_marks == 9:
-                print("Game is even.")
-                print("Do you want to play again?(Y/N)")
-
+        except AttributeError:
+            pass
+       
+       
     def on_release(key):
         global n_pressed
-        if n_pressed is True:
-            os._exit(0)
-
+        global again_true
+        try:
+            if n_pressed is True:
+                listener.stop()
+                again_true = False
+                return
+        except AttributeError:
+            pass
+    
+    
+         
     print("Start by moving the cursor with arrows.")
     print("Press space for mark.")
     display_grid(rows)
@@ -287,5 +305,7 @@ def main_game():
             on_release=on_release) as listener:
         listener.join()
 
+again_true = True
 
-main_game()
+while again_true:
+    main_game()
